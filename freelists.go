@@ -27,7 +27,7 @@ import (
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getInMessage() (x *buffer.InMessage) {
 	c.mu.Lock()
-	x = (*buffer.InMessage)(c.inMessages.Get())
+	x = (*buffer.InMessage)(c.inMessages.Get("IN"))
 	c.mu.Unlock()
 
 	if x == nil {
@@ -40,7 +40,7 @@ func (c *Connection) getInMessage() (x *buffer.InMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putInMessage(x *buffer.InMessage) {
 	c.mu.Lock()
-	c.inMessages.Put(unsafe.Pointer(x))
+	c.inMessages.Put(unsafe.Pointer(x), "IN")
 	c.mu.Unlock()
 }
 
@@ -51,7 +51,7 @@ func (c *Connection) putInMessage(x *buffer.InMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getOutMessage() (x *buffer.OutMessage) {
 	c.mu.Lock()
-	x = (*buffer.OutMessage)(c.outMessages.Get())
+	x = (*buffer.OutMessage)(c.outMessages.Get("OUT"))
 	c.mu.Unlock()
 
 	if x == nil {
@@ -65,6 +65,6 @@ func (c *Connection) getOutMessage() (x *buffer.OutMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putOutMessage(x *buffer.OutMessage) {
 	c.mu.Lock()
-	c.outMessages.Put(unsafe.Pointer(x))
+	c.outMessages.Put(unsafe.Pointer(x), "OUT")
 	c.mu.Unlock()
 }

@@ -26,10 +26,10 @@ type Freelist struct {
 }
 
 // Get an element from the freelist, returning nil if empty.
-func (fl *Freelist) Get() (p unsafe.Pointer) {
+func (fl *Freelist) Get(msg string) (p unsafe.Pointer) {
 	if len(fl.list) > fl.maxCount {
 		fl.maxCount = len(fl.list)
-		fmt.Println("max count = ", fl.maxCount)
+		fmt.Printf("[%s] max count: %d\n", msg, fl.maxCount)
 	}
 	l := len(fl.list)
 	if l == 0 {
@@ -43,6 +43,10 @@ func (fl *Freelist) Get() (p unsafe.Pointer) {
 }
 
 // Contribute an element back to the freelist.
-func (fl *Freelist) Put(p unsafe.Pointer) {
+func (fl *Freelist) Put(p unsafe.Pointer, msg string) {
 	fl.list = append(fl.list, p)
+	if len(fl.list) > fl.maxCount {
+		fl.maxCount = len(fl.list)
+		fmt.Printf("[%s] max count: %d\n", msg, fl.maxCount)
+	}
 }
