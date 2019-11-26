@@ -14,15 +14,23 @@
 
 package freelist
 
-import "unsafe"
+import (
+	"fmt"
+	"unsafe"
+)
 
 // A freelist for arbitrary pointers. Not safe for concurrent access.
 type Freelist struct {
-	list []unsafe.Pointer
+	list     []unsafe.Pointer
+	maxCount int
 }
 
 // Get an element from the freelist, returning nil if empty.
 func (fl *Freelist) Get() (p unsafe.Pointer) {
+	if len(fl.list) > fl.maxCount {
+		fl.maxCount = len(fl.list)
+		fmt.Println("max count", fl.maxCount)
+	}
 	l := len(fl.list)
 	if l == 0 {
 		return
