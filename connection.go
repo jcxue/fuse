@@ -22,6 +22,7 @@ import (
 	"os"
 	"path"
 	"runtime"
+	"strconv"
 	"sync"
 	"syscall"
 
@@ -77,6 +78,10 @@ type Connection struct {
 	// Freelists, serviced by freelists.go.
 	inMessages  freelist.Freelist // GUARDED_BY(mu)
 	outMessages freelist.Freelist // GUARDED_BY(mu)
+
+	// mmaped file
+	mmapedFile   *os.File
+	mmapedBuffer []byte
 }
 
 // State that is maintained for each in-flight op. This is stuffed into the
@@ -168,7 +173,42 @@ func (c *Connection) Init() (err error) {
 		initOp.Flags |= fusekernel.InitWritebackCache
 	}
 
+	// create mmaped file
+	if fname, ok := c.cfg.Options["shm_fname"]; ok {
+		if fsizeStr, ok := c.cfg.Options["shm_fsize"]; ok {
+			fsize := int64(0)
+			fsize, err = strconv.ParseInt(fsizeStr, 10, 64)
+			if err != nil {
+				return
+			}
+			err = c.initShm(fname, fsize)
+		} else {
+			return
+		}
+	}
+
 	c.Reply(ctx, nil)
+	return
+}
+
+func (c *Connection) initShm(fname string, fsize int64) (err error) {
+	fmt.Println("initialize shm", fname, fsize)
+	c.mmapedFile, err = os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0755)
+	if err != nil {
+		return
+	}
+
+	fd := int(c.mmapedFile.Fd())
+	err = syscall.Ftruncate(fd, fsize)
+	if err != nil {
+		return
+	}
+
+	c.mmapedBuffer, err = syscall.Mmap(fd, 0, int(fsize), syscall.PROT_READ|syscall.PROT_WRITE, syscall.MAP_SHARED)
+	if err != nil {
+		return
+	}
+
 	return
 }
 
@@ -504,5 +544,14 @@ func (c *Connection) close() (err error) {
 	// write, but luckily we exclude the possibility of a race by requiring the
 	// user to respond to all ops first.
 	err = c.dev.Close()
+
+	// close and remove mmaped file
+	if fname, ok := c.cfg.Options["shm_fname"]; ok {
+		fmt.Println("removing shm")
+		syscall.Munmap(c.mmapedBuffer)
+		c.mmapedFile.Close()
+		err = os.Remove(fname)
+	}
+
 	return
 }
