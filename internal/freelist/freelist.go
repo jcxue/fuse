@@ -29,7 +29,7 @@ type Freelist struct {
 func (fl *Freelist) Get() (p unsafe.Pointer) {
 	if len(fl.list) > fl.maxCount {
 		fl.maxCount = len(fl.list)
-		fmt.Println("max count", fl.maxCount)
+		fmt.Println("max count = ", fl.maxCount)
 	}
 	l := len(fl.list)
 	if l == 0 {
