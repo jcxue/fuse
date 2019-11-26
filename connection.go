@@ -550,11 +550,11 @@ func (c *Connection) close() (err error) {
 	err = c.dev.Close()
 
 	// close and remove mmaped file
-	if _, ok := c.cfg.Options["shm_fname"]; ok {
+	if fname, ok := c.cfg.Options["shm_fname"]; ok {
 		log.Println("removing shm")
 		syscall.Munmap(c.mmapedBuffer)
 		c.mmapedFile.Close()
-		//err = os.Remove(fname)
+		err = os.Remove(fname)
 	}
 
 	return
