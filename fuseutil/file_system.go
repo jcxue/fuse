@@ -19,8 +19,8 @@ import (
 	"io"
 	"sync"
 
-	"github.com/jacobsa/fuse"
-	"github.com/jacobsa/fuse/fuseops"
+	"github.com/jcxue/fuse"
+	"github.com/jcxue/fuse/fuseops"
 )
 
 // An interface with a method for each op type in the fuseops package. This can

@@ -1,9 +1,9 @@
-[![GoDoc](https://godoc.org/github.com/jacobsa/ogletest?status.svg)](https://godoc.org/github.com/jacobsa/fuse)
+[![GoDoc](https://godoc.org/github.com/jacobsa/ogletest?status.svg)](https://godoc.org/github.com/jcxue/fuse)
 
 This package allows for writing and mounting user-space file systems from Go.
 Install it as follows:
 
-    go get -u github.com/jacobsa/fuse
+    go get -u github.com/jcxue/fuse
 
 Afterward, see the documentation for the following three packages:
 
@@ -23,8 +23,8 @@ and tests.
 This package owes its inspiration and most of its kernel-related code to
 [bazil.org/fuse][bazil].
 
-[fuse]: http://godoc.org/github.com/jacobsa/fuse
-[fuseops]: http://godoc.org/github.com/jacobsa/fuse/fuseops
-[fuseutil]: http://godoc.org/github.com/jacobsa/fuse/fuseutil
-[samples]: http://godoc.org/github.com/jacobsa/fuse/samples
+[fuse]: http://godoc.org/github.com/jcxue/fuse
+[fuseops]: http://godoc.org/github.com/jcxue/fuse/fuseops
+[fuseutil]: http://godoc.org/github.com/jcxue/fuse/fuseutil
+[samples]: http://godoc.org/github.com/jcxue/fuse/samples
 [bazil]: http://godoc.org/bazil.org/fuse
