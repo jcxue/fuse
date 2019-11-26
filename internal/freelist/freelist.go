@@ -15,7 +15,7 @@
 package freelist
 
 import (
-	"fmt"
+	"log"
 	"unsafe"
 )
 
@@ -29,7 +29,7 @@ type Freelist struct {
 func (fl *Freelist) Get(msg string) (p unsafe.Pointer) {
 	if len(fl.list) > fl.maxCount {
 		fl.maxCount = len(fl.list)
-		fmt.Printf("[%s] max count: %d\n", msg, fl.maxCount)
+		log.Printf("[%s] max count: %d\n", msg, fl.maxCount)
 	}
 	l := len(fl.list)
 	if l == 0 {
@@ -47,6 +47,6 @@ func (fl *Freelist) Put(p unsafe.Pointer, msg string) {
 	fl.list = append(fl.list, p)
 	if len(fl.list) > fl.maxCount {
 		fl.maxCount = len(fl.list)
-		fmt.Printf("[%s] max count: %d\n", msg, fl.maxCount)
+		log.Printf("[%s] max count: %d\n", msg, fl.maxCount)
 	}
 }
