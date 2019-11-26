@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"sync"
 	"syscall"
+	"unsafe"
 
 	"github.com/jcxue/fuse/fuseops"
 	"github.com/jcxue/fuse/internal/buffer"
@@ -122,7 +123,7 @@ func newConnection(
 
 // Init performs the work necessary to cause the mount process to complete.
 func (c *Connection) Init() (err error) {
-	fmt.Println("init connection")
+	log.Println("init connection")
 	// Read the init op.
 	ctx, op, err := c.ReadOp()
 	if err != nil {
@@ -195,7 +196,7 @@ func (c *Connection) Init() (err error) {
 }
 
 func (c *Connection) initShm(fname string, fsize int64) (err error) {
-	fmt.Println("initialize shm", fname, fsize)
+	log.Println("initialize shm", fname, fsize, "in message size", unsafe.Sizeof(buffer.InMessage{}), "out message size", unsafe.Sizeof(buffer.OutMessage{}))
 	c.mmapedFile, err = os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
 		return
@@ -549,11 +550,11 @@ func (c *Connection) close() (err error) {
 	err = c.dev.Close()
 
 	// close and remove mmaped file
-	if fname, ok := c.cfg.Options["shm_fname"]; ok {
-		fmt.Println("removing shm")
+	if _, ok := c.cfg.Options["shm_fname"]; ok {
+		log.Println("removing shm")
 		syscall.Munmap(c.mmapedBuffer)
 		c.mmapedFile.Close()
-		err = os.Remove(fname)
+		//err = os.Remove(fname)
 	}
 
 	return

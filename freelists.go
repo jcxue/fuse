@@ -15,6 +15,7 @@
 package fuse
 
 import (
+	"log"
 	"unsafe"
 
 	"github.com/jcxue/fuse/internal/buffer"
@@ -31,7 +32,10 @@ func (c *Connection) getInMessage() (x *buffer.InMessage) {
 	c.mu.Unlock()
 
 	if x == nil {
+		log.Println("new in message")
 		x = new(buffer.InMessage)
+	} else {
+		log.Println("got free in message")
 	}
 
 	return
@@ -40,6 +44,7 @@ func (c *Connection) getInMessage() (x *buffer.InMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putInMessage(x *buffer.InMessage) {
 	c.mu.Lock()
+	log.Println("put in message")
 	c.inMessages.Put(unsafe.Pointer(x))
 	c.mu.Unlock()
 }
@@ -55,7 +60,10 @@ func (c *Connection) getOutMessage() (x *buffer.OutMessage) {
 	c.mu.Unlock()
 
 	if x == nil {
+		log.Println("new out message")
 		x = new(buffer.OutMessage)
+	} else {
+		log.Println("got free out message")
 	}
 	x.Reset()
 
@@ -65,6 +73,7 @@ func (c *Connection) getOutMessage() (x *buffer.OutMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putOutMessage(x *buffer.OutMessage) {
 	c.mu.Lock()
+	log.Println("put out message")
 	c.outMessages.Put(unsafe.Pointer(x))
 	c.mu.Unlock()
 }
