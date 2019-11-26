@@ -38,6 +38,7 @@ func Mount(
 	config *MountConfig) (mfs *MountedFileSystem, err error) {
 	// Sanity check: make sure the mount point exists and is a directory. This
 	// saves us from some confusing errors later on OS X.
+	fmt.Printf("start mounting: %+v\n", config.Options)
 	fi, err := os.Stat(dir)
 	switch {
 	case os.IsNotExist(err):

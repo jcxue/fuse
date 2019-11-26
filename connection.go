@@ -122,6 +122,7 @@ func newConnection(
 
 // Init performs the work necessary to cause the mount process to complete.
 func (c *Connection) Init() (err error) {
+	fmt.Println("init connection")
 	// Read the init op.
 	ctx, op, err := c.ReadOp()
 	if err != nil {
@@ -185,6 +186,8 @@ func (c *Connection) Init() (err error) {
 		} else {
 			return
 		}
+	} else {
+		fmt.Println("shm_fname does not exist")
 	}
 
 	c.Reply(ctx, nil)
