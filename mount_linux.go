@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -28,7 +29,7 @@ func fusermount(dir string, cfg *MountConfig) (*os.File, error) {
 
 	// Start fusermount, passing it a buffer in which to write stderr.
 	var stderr bytes.Buffer
-
+	log.Println("cfg options string", cfg.toOptionsString())
 	cmd := exec.Command(
 		"fusermount",
 		"-o", cfg.toOptionsString(),
