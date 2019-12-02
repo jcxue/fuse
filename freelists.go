@@ -14,6 +14,9 @@
 
 package fuse
 
+// #include <ctest.h>
+import "C"
+
 import (
 	"unsafe"
 
@@ -27,6 +30,7 @@ import (
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getInMessage() (x *buffer.InMessage) {
 	c.mu.Lock()
+	C.print_hello()
 	x = (*buffer.InMessage)(c.inMessages.Get("IN"))
 	c.mu.Unlock()
 
