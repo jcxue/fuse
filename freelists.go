@@ -14,7 +14,7 @@
 
 package fuse
 
-// #include <ctest.h>
+// #include <cfreelist.h>
 import "C"
 
 import (
@@ -30,7 +30,7 @@ import (
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getInMessage() (x *buffer.InMessage) {
 	c.mu.Lock()
-	C.print_hello()
+	x = (*buffer.InMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
 	x = (*buffer.InMessage)(c.inMessages.Get("IN"))
 	c.mu.Unlock()
 
@@ -44,6 +44,7 @@ func (c *Connection) getInMessage() (x *buffer.InMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putInMessage(x *buffer.InMessage) {
 	c.mu.Lock()
+	C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
 	c.inMessages.Put(unsafe.Pointer(x), "IN")
 	c.mu.Unlock()
 }

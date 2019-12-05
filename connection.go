@@ -14,6 +14,9 @@
 
 package fuse
 
+// #include <cfreelist.h>
+import "C"
+
 import (
 	"context"
 	"fmt"
@@ -83,6 +86,7 @@ type Connection struct {
 	// mmaped file
 	mmapedFile   *os.File
 	mmapedBuffer []byte
+	cfreeList    C.FreeListRef
 }
 
 // State that is maintained for each in-flight op. This is stuffed into the
@@ -176,13 +180,13 @@ func (c *Connection) Init() (err error) {
 
 	// create mmaped file
 	if fname, ok := c.cfg.Options["shm_fname"]; ok {
-		if fsizeStr, ok := c.cfg.Options["shm_fsize"]; ok {
-			fsize := int64(0)
-			fsize, err = strconv.ParseInt(fsizeStr, 10, 64)
+		if msgConcurrencyStr, ok := c.cfg.Options["shm_msg_concurrency"]; ok {
+			msgConcurrency := int64(0)
+			msgConcurrency, err = strconv.ParseInt(msgConcurrencyStr, 10, 64)
 			if err != nil {
 				return
 			}
-			err = c.initShm(fname, fsize)
+			err = c.initShm(fname, msgConcurrency)
 		} else {
 			return
 		}
@@ -194,13 +198,22 @@ func (c *Connection) Init() (err error) {
 	return
 }
 
-func (c *Connection) initShm(fname string, fsize int64) (err error) {
-	log.Println("initialize shm", fname, fsize, "in message size", unsafe.Sizeof(buffer.InMessage{}), "out message size", unsafe.Sizeof(buffer.OutMessage{}))
+func (c *Connection) initShm(fname string, msgConcurrency int64) (err error) {
+	log.Println("[initShm]", fname, msgConcurrency, "in message size", unsafe.Sizeof(buffer.InMessage{}), "out message size", unsafe.Sizeof(buffer.OutMessage{}))
 	c.mmapedFile, err = os.OpenFile(fname, os.O_CREATE|os.O_RDWR, 0755)
 	if err != nil {
 		return
 	}
 
+	msgSize := unsafe.Sizeof(buffer.InMessage{})
+	if msgSize < unsafe.Sizeof(buffer.OutMessage{}) {
+		msgSize = unsafe.Sizeof(buffer.OutMessage{})
+	}
+	if msgSize%64 != 0 {
+		// make msgSize cache block aligned
+		msgSize = ((msgSize / 64) + 1) * 64
+	}
+	fsize := int64(msgSize) * msgConcurrency
 	fd := int(c.mmapedFile.Fd())
 	err = syscall.Ftruncate(fd, fsize)
 	if err != nil {
@@ -212,6 +225,13 @@ func (c *Connection) initShm(fname string, fsize int64) (err error) {
 		return
 	}
 
+	c.cfreeList = C.CreateFreeList((*C.uint8_t)(&c.mmapedBuffer[0]), C.int(msgConcurrency*2), C.uint64_t(msgSize))
+	if c.cfreeList == nil {
+		err = fmt.Errorf("failed to create c freelist")
+		return
+	}
+
+	log.Println("[initShm]", msgSize, fsize)
 	return
 }
 
@@ -558,6 +578,8 @@ func (c *Connection) close() (err error) {
 			log.Println("failed to remove", fname, err)
 		}
 	}
+
+	C.DestroyFreeList(c.cfreeList)
 
 	return
 }
