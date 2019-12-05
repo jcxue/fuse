@@ -127,6 +127,7 @@ func newConnection(
 
 // Init performs the work necessary to cause the mount process to complete.
 func (c *Connection) Init() (err error) {
+	log.Println("init connection")
 	// Read the init op.
 	ctx, op, err := c.ReadOp()
 	if err != nil {
