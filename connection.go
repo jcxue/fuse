@@ -187,11 +187,16 @@ func (c *Connection) Init() (err error) {
 				return
 			}
 			err = c.initShm(fname, msgConcurrency)
+			if err != nil {
+				log.Println("initShm: ", err)
+				return
+			}
 		} else {
+			log.Println("shm_msg_concurrency does not exist")
 			return
 		}
 	} else {
-		fmt.Println("shm_fname does not exist")
+		log.Println("shm_fname does not exist")
 	}
 
 	c.Reply(ctx, nil)
@@ -225,7 +230,7 @@ func (c *Connection) initShm(fname string, msgConcurrency int64) (err error) {
 		return
 	}
 
-	c.cfreeList = C.CreateFreeList((*C.uint8_t)(&c.mmapedBuffer[0]), C.int(msgConcurrency*2), C.uint64_t(msgSize))
+	c.cfreeList = C.CreateFreeList((*C.uint8_t)(&c.mmapedBuffer[0]), C.int(msgConcurrency), C.uint64_t(msgSize))
 	if c.cfreeList == nil {
 		err = fmt.Errorf("failed to create c freelist")
 		return
