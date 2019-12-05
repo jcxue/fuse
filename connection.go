@@ -185,6 +185,7 @@ func (c *Connection) Init() (err error) {
 			msgConcurrency := int64(0)
 			msgConcurrency, err = strconv.ParseInt(msgConcurrencyStr, 10, 64)
 			if err != nil {
+				log.Println("failed to parse msg concurrency", err)
 				return
 			}
 			err = c.initShm(fname, msgConcurrency)
