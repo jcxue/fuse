@@ -227,7 +227,7 @@ func mapToOptionsString(opts map[string]string) string {
 	var components []string
 	for k, v := range opts {
 		k = escapeOptionsKey(k)
-		if strings.Contains(k, "shm_fname") || strings.Contains(k, "shm_fsize") {
+		if strings.Contains(k, "shm_fname") || strings.Contains(k, "shm_msg_concurrency") {
 			continue
 		}
 
