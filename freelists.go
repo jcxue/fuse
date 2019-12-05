@@ -18,6 +18,7 @@ package fuse
 import "C"
 
 import (
+	"log"
 	"unsafe"
 
 	"github.com/jcxue/fuse/internal/buffer"
@@ -30,7 +31,11 @@ import (
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getInMessage() (x *buffer.InMessage) {
 	c.mu.Lock()
-	x = (*buffer.InMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
+	if c.cfreeList != nil {
+		x = (*buffer.InMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
+	} else {
+		log.Println("cfreelist not initialized")
+	}
 	x = (*buffer.InMessage)(c.inMessages.Get("IN"))
 	c.mu.Unlock()
 
