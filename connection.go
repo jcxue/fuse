@@ -128,6 +128,28 @@ func newConnection(
 // Init performs the work necessary to cause the mount process to complete.
 func (c *Connection) Init() (err error) {
 	log.Printf("init connection: %+v\n", c.cfg.Options)
+	// create mmaped file
+	if fname, ok := c.cfg.Options["shm_fname"]; ok {
+		if msgConcurrencyStr, ok := c.cfg.Options["shm_msg_concurrency"]; ok {
+			msgConcurrency := int64(0)
+			msgConcurrency, err = strconv.ParseInt(msgConcurrencyStr, 10, 64)
+			if err != nil {
+				log.Println("failed to parse msg concurrency", err)
+				return
+			}
+			err = c.initShm(fname, msgConcurrency)
+			if err != nil {
+				log.Println("initShm: ", err)
+				return
+			}
+		} else {
+			log.Println("shm_msg_concurrency does not exist")
+			return
+		}
+	} else {
+		log.Println("shm_fname does not exist")
+	}
+
 	// Read the init op.
 	ctx, op, err := c.ReadOp()
 	if err != nil {
@@ -177,28 +199,6 @@ func (c *Connection) Init() (err error) {
 	// Enable writeback caching if the user hasn't asked us not to.
 	if !c.cfg.DisableWritebackCaching {
 		initOp.Flags |= fusekernel.InitWritebackCache
-	}
-
-	// create mmaped file
-	if fname, ok := c.cfg.Options["shm_fname"]; ok {
-		if msgConcurrencyStr, ok := c.cfg.Options["shm_msg_concurrency"]; ok {
-			msgConcurrency := int64(0)
-			msgConcurrency, err = strconv.ParseInt(msgConcurrencyStr, 10, 64)
-			if err != nil {
-				log.Println("failed to parse msg concurrency", err)
-				return
-			}
-			err = c.initShm(fname, msgConcurrency)
-			if err != nil {
-				log.Println("initShm: ", err)
-				return
-			}
-		} else {
-			log.Println("shm_msg_concurrency does not exist")
-			return
-		}
-	} else {
-		log.Println("shm_fname does not exist")
 	}
 
 	c.Reply(ctx, nil)

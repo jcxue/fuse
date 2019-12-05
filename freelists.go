@@ -49,7 +49,11 @@ func (c *Connection) getInMessage() (x *buffer.InMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putInMessage(x *buffer.InMessage) {
 	c.mu.Lock()
-	C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
+	if c.cfreeList != nil {
+		C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
+	} else {
+		log.Println("cfreelist not initialized")
+	}
 	c.inMessages.Put(unsafe.Pointer(x), "IN")
 	c.mu.Unlock()
 }
