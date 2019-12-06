@@ -91,14 +91,13 @@ func (m *InMessage) Len() uintptr {
 // Consume the next n bytes from the message, returning a nil pointer if there
 // are fewer than n bytes available.
 func (m *InMessage) Consume(n uintptr) (p unsafe.Pointer) {
-	fmt.Println("InMessage Consume", n, m.Len())
-	if m.Len() == 0 || n > m.Len() {
-		if m.Len() == 0 {
-			fmt.Println("m.Len() == 0")
-		}
-		if n > m.Len() {
-			fmt.Println("n > m.Len()", n, m.Len())
-		}
+	if m.Len() == 0 {
+		fmt.Println("InMessage Consume", n, m.Len())
+		return
+	}
+
+	if n > m.Len() {
+		fmt.Println("InMessage Consume", n, m.Len())
 		return
 	}
 
