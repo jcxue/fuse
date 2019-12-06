@@ -110,6 +110,10 @@ void PutMessage(FreeListRef flRef, uint8_t* msg) {
 void DestroyFreeList(FreeListRef flRef) {
     fprintf(stderr, "destroy free list\n");
     FreeList *fl = (FreeList *)flRef;
-    free((void *)fl->bitVector);
-    free(fl);
+    if (fl != NULL) {
+        if (fl->bitVector != NULL) {
+            free((void *)fl->bitVector);
+        }
+        free(fl);
+    }
 }
