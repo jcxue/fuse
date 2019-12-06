@@ -85,15 +85,15 @@ retry:
 
             return fl->msgBuffer + (uint64_t)pos * (uint64_t)fl->msgSize;
         }
-
-        numRetires += 1;
-        if (numRetires >= 3) {
-            break;
-        }
+        fprintf(stderr, "retry GetMessage\n");
+        // numRetires += 1;
+        // if (numRetires >= 3) {
+        //     break;
+        // }
     }
 
-    fprintf(stderr, "no available spot found\n");
-    return NULL;
+    // fprintf(stderr, "no available spot found\n");
+    // return NULL;
 }
 
 void PutMessage(FreeListRef flRef, uint8_t* msg) {
