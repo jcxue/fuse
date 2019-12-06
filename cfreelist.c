@@ -56,7 +56,7 @@ FreeListRef CreateFreeList(uint8_t* msgBuffer, int msgCount, uint64_t msgSize) {
 }
 
 uint8_t* GetMessage(FreeListRef freeListRef) {
-    fprintf(stderr, "c get message\n");
+    //fprintf(stderr, "c get message\n");
     int numRetires = 0, pos = 0;
     uint64_t oldBitVectorVal = 0, mask = 0, newBitVectorVal = 0;
     bool success = false;
@@ -97,7 +97,7 @@ retry:
 }
 
 void PutMessage(FreeListRef flRef, uint8_t* msg) {
-    fprintf(stderr, "c put message\n");
+    //fprintf(stderr, "c put message\n");
     FreeList *fl = (FreeList *)flRef;
     int pos = (msg - fl->msgBuffer) / fl->msgSize;
     int vecIdx = pos >> 6;
