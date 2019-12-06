@@ -18,7 +18,6 @@ package fuse
 import "C"
 
 import (
-	"log"
 	"unsafe"
 
 	"github.com/jcxue/fuse/internal/buffer"
@@ -31,12 +30,8 @@ import (
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getInMessage() (x *buffer.InMessage) {
 	c.mu.Lock()
-	if c.cfreeList != nil {
-		x = (*buffer.InMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
-	} else {
-		log.Println("cfreelist not initialized")
-	}
-	x = (*buffer.InMessage)(c.inMessages.Get("IN"))
+	x = (*buffer.InMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
+	//x = (*buffer.InMessage)(c.inMessages.Get("IN"))
 	c.mu.Unlock()
 
 	if x == nil {
@@ -49,12 +44,8 @@ func (c *Connection) getInMessage() (x *buffer.InMessage) {
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putInMessage(x *buffer.InMessage) {
 	c.mu.Lock()
-	if c.cfreeList != nil {
-		C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
-	} else {
-		log.Println("cfreelist not initialized")
-	}
-	c.inMessages.Put(unsafe.Pointer(x), "IN")
+	C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
+	//c.inMessages.Put(unsafe.Pointer(x), "IN")
 	c.mu.Unlock()
 }
 
