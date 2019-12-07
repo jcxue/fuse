@@ -73,24 +73,24 @@ func (c *Connection) putInMessage(x *buffer.InMessage) {
 
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) getOutMessage() (x *buffer.OutMessage) {
-	// c.mu.Lock()
-	// x = (*buffer.OutMessage)(c.outMessages.Get("OUT"))
-	// c.mu.Unlock()
+	c.mu.Lock()
+	x = (*buffer.OutMessage)(c.outMessages.Get("OUT"))
+	c.mu.Unlock()
 
-	// if x == nil {
-	// 	x = new(buffer.OutMessage)
-	// }
-	if c.cfreeList != nil {
-		x = (*buffer.OutMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
-	} else {
-		c.mu.Lock()
-		x = (*buffer.OutMessage)(c.outMessages.Get("OUT"))
-		c.mu.Unlock()
-
-		if x == nil {
-			x = new(buffer.OutMessage)
-		}
+	if x == nil {
+		x = new(buffer.OutMessage)
 	}
+	// if c.cfreeList != nil {
+	// 	x = (*buffer.OutMessage)(unsafe.Pointer(C.GetMessage(c.cfreeList)))
+	// } else {
+	// 	c.mu.Lock()
+	// 	x = (*buffer.OutMessage)(c.outMessages.Get("OUT"))
+	// 	c.mu.Unlock()
+
+	// 	if x == nil {
+	// 		x = new(buffer.OutMessage)
+	// 	}
+	// }
 
 	x.Reset()
 
@@ -99,14 +99,14 @@ func (c *Connection) getOutMessage() (x *buffer.OutMessage) {
 
 // LOCKS_EXCLUDED(c.mu)
 func (c *Connection) putOutMessage(x *buffer.OutMessage) {
-	// c.mu.Lock()
-	// c.outMessages.Put(unsafe.Pointer(x), "OUT")
-	// c.mu.Unlock()
-	if c.cfreeList != nil {
-		C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
-	} else {
-		c.mu.Lock()
-		c.outMessages.Put(unsafe.Pointer(x), "OUT")
-		c.mu.Unlock()
-	}
+	c.mu.Lock()
+	c.outMessages.Put(unsafe.Pointer(x), "OUT")
+	c.mu.Unlock()
+	// if c.cfreeList != nil {
+	// 	C.PutMessage(c.cfreeList, (*C.uint8_t)(unsafe.Pointer(x)))
+	// } else {
+	// 	c.mu.Lock()
+	// 	c.outMessages.Put(unsafe.Pointer(x), "OUT")
+	// 	c.mu.Unlock()
+	// }
 }
