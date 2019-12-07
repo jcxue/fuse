@@ -17,6 +17,7 @@ package buffer
 import (
 	"fmt"
 	"io"
+	"log"
 	"syscall"
 	"unsafe"
 
@@ -72,6 +73,10 @@ func (m *InMessage) Init(r io.Reader) (err error) {
 			n)
 
 		return
+	}
+
+	if len(m.remaining) == 0 {
+		log.Printf("\nInMessage Init %d %d\n", len(m.storage[:]), headerSize)
 	}
 
 	return
